@@ -126,11 +126,11 @@ Use this tag in your <HEAD> tag.
 
 h3. Examples
 
-bc..<head>
+bc.. <head>
    <txp:shs_content_type />
 </head>
 
-bc..<head>
+bc.. <head>
    <txp:shs_content_type html5="1" />
 </head>
 
@@ -153,13 +153,11 @@ bc.. <txp:shs_xml_declaration />
 <head>
 <body>
    ...
-
    <txp:shs_if_xhtml_accepted>
       ...
    <txp:else />
       ...
    <txp:shs_if_xhtml_accepted>
-
    ...
 </body>
 </html>
