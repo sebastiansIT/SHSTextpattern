@@ -1,5 +1,5 @@
 <?php
-	// Copyright 2012 Sebastian Spautz
+	// Copyright 2012, 2014 Sebastian Spautz
 	
 	// "Textpattern Twitter Cards Plugin" is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ $plugin['name'] = 'shs_twittercards';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '0.2.0';
+$plugin['version'] = '0.2.1';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Creates Meta-Elements to include Twitter Cards into your pages.';
@@ -94,7 +94,7 @@ if (0) {
 ?>
 # --- BEGIN PLUGIN HELP ---
 
-h1. Textpattern Twitter Cards Plugin (Version 0.2.0)
+h1. Textpattern Twitter Cards Plugin (Version 0.2.´1)
 
 This plugin for Textpattern 4.5.4 implements the Twitter Cards format (the version from 2013-05-08). "Twitter Cards":https://dev.twitter.com/docs/cards is a meta data format to improve the user experience sharing websites on Twitter. For more information about Twitter Cards see https://dev.twitter.com/docs/cards.
 
@@ -157,7 +157,7 @@ h3. Main Source Code
 
 This software (without included parts, see below) is licensed under the following GPL license:
 
-pre.  * Copyright 2012 Sebastian Spautz
+pre.  * Copyright 2012, 2014 Sebastian Spautz
  *
  * Textpattern Twitter Cards Plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -218,8 +218,9 @@ h2. ChangeLog
 * _0.1.1:_ Fix a bug setting twitter:image to the dokuments permalink
 * _0.1.2:_ Fix a bug width case sensitve attribute names
 * _0.1.3:_ Restructuring the code to get the twitter:image value
-* _0.1.4:_ Some Refactoring
+* _0.1.4:_ Some Refactoring (compatible width Textpattern 4.5.1)
 * _0.2.0:_ Add card type *summary_large_image* to documentation; implement card type *app* and the *deep-linking feature* of twitter cards
+* _0.2.1:_ Check if Title or Description are empty strings
 # --- END PLUGIN HELP ---
 <?php
 }
@@ -262,12 +263,22 @@ function shs_twittercards($atts) {
 			'playerstreamcontenttype' => ''
 			), $atts));
 		
+		// Check the title for empty string
+		if ($title == '') {
+			$title = 'Unkown Title';
+		}
+		
+		// Check the description for empty string
+		if ($description == '') {
+			$description = 'Nothing to describe!';
+		}
+		
 		// Check the article_image for
 		//  a) a picture is set
 		if ($image != '') {
 			$image_url = $image;
 		}
-		//  b) a article image exists
+		//  b) an article image exists
 		else if ($GLOBALS['thisarticle']['article_image'] != '')
 		{
 			$image_url = $GLOBALS['thisarticle']['article_image'];

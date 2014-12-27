@@ -1,0 +1,339 @@
+﻿<!DOCTYPE html>
+
+<html lang="de">
+  <head>
+    <!-- http://learnthemobileweb.com/tag/handheldfriendly/ -->
+	<meta name="MobileOptimized" content="width" />
+	<meta name="HandheldFriendly" content="true" />
+    <meta content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;' name='viewport' />
+	<meta name="viewport" content="width=device-width" />
+    
+	<meta charset="utf-8" />
+    <title>Textpattern Twitter Cards Plugin &ndash; Lab &ndash; Human Injection</title>
+
+    <style>
+	body { text-align:center; }
+	header { margin:0 10% 3em 10%; }
+	article { margin:2em 10%; }
+	section { text-align:left; min-width:60%; margin:0 auto 1.4em auto; border:3px solid green; padding:2em;  }
+	footer { margin-top: 5em; clear:both; }
+	td { border:1px solid green; padding:0.4em; }
+    </style>
+  </head>
+  <body>
+  <header>
+		<h1>Human Injection Laboratories</h1>
+		<h2>Textpattern Twitter Cards Plugin</a></h2> 
+  </header>
+  <article>
+    
+    <section>
+		<h1>Description</h1>
+		<p>This is a plugin for Textpattern 4.5.4. This plugin implements the Twitter Cards format. <a href="https://dev.twitter.com/docs/cards" rel="nofollow">Twitter Cards</a> is a meta data format to improve the user experience sharing websites on Twitter.</p>
+		<p>The only tag defined in this plugin is <code>&lt;txp:shs_twittercards&gt;</code>. It works only inside a single article scope. In article lists you need to implement Twitter Cards manually.</p>
+	</section>
+	
+	<section>
+		<h1>Download</h1>
+		<ul>
+			<li><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-2-1.php">Plugin Version 0.2.1</a></li>
+			<li><a href="http://lab.human-injection.de/twittercards/shs_twittercards.php.txt">Source code</a></li>
+		</ul>
+	</section>
+	
+	<section>
+		<h1>Manual</h1>
+		<h2>Basic Usage</h2>
+		<p>The basic usage of <code>&lt;txp:shs_twittercards /&gt;</code> creates some basic Meta-Elements filled width coressponding Textpattern fields:</p>
+		<pre><code>&lt;meta name=&quot;twitter:card&quot; content=&quot;summary&quot;&gt;
+&lt;meta name=&quot;twitter:url&quot; content=&quot;{Permalink of the article}&quot;&gt;
+&lt;meta name=&quot;twitter:title&quot; content=&quot;{Title of the article}&quot;&gt;
+&lt;meta name=&quot;twitter:description&quot; content=&quot;{Exceprt of the article (HTML element are striped out)}&quot;&gt;
+&lt;meta name=&quot;twitter:image&quot; content=&quot;{Article image (if exists)}&quot;&gt;
+</code></pre>
+
+		<h2>Attributes</h2>
+		<p>Each Property in Twitter Cards corresponds with an Attribute for <code>&lt;txp:shs_twittercards&gt;</code>:</p>
+
+		<table>
+		  <thead>
+			<tr>
+			  <th>Property </th>
+			  <th>Attribute </th>
+			  <th>Values </th>
+			  <th>Defaults </th>
+			</tr>
+		  </thead>
+		  <tbody>
+			<tr>
+			  <td> twitter:card </td>
+			  <td> cardtype </td>
+			  <td> summary, summary_large_image, photo, app or player </td>
+			  <td> summary </td>
+			</tr>
+			<tr>
+			  <td> twitter:site </td>
+			  <td> site </td>
+			  <td> a twitter Name </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:site:id </td>
+			  <td> siteid </td>
+			  <td> a twitter user ID </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:creator </td>
+			  <td> creator </td>
+			  <td> a twitter Name </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:creator:id </td>
+			  <td> creatorid </td>
+			  <td> a twitter user ID </td>
+			  <td> empty </td>
+			</tr>
+		  </tbody>
+		  <tbody>
+			<tr>
+			  <td> twitter:title </td>
+			  <td> title </td>
+			  <td> a raw text </td>
+			  <td> article title </td>
+			</tr>
+			<tr>
+			  <td> twitter:description </td>
+			  <td> description </td>
+			  <td> a text </td>
+			  <td>
+				 excerpt of the article (
+				<span class="caps">HTML</span>
+				 element are striped out) 
+			  </td>
+			</tr>
+			<tr>
+			  <td> twitter:image </td>
+			  <td> image </td>
+			  <td> a picture url </td>
+			  <td> article picture if exitst </td>
+			</tr>
+		  </tbody>
+		  <tbody>
+			<tr>
+			  <td> twitter:image:width </td>
+			  <td> imagewidth </td>
+			  <td> a integer </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:image:height </td>
+			  <td> imageheight </td>
+			  <td> a integer </td>
+			  <td> emtpy </td>
+			</tr>
+		  </tbody>
+		  <tbody>
+			<tr>
+			  <td> twitter:app:id:iphone </td>
+			  <td> appidiphone </td>
+			  <td> App Store ID </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:app:name:iphone </td>
+			  <td> appnameiphone </td>
+			  <td> a string </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:app:url:iphone </td>
+			  <td> appurliphone </td>
+			  <td> u url </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:app:id:ipad </td>
+			  <td> appidipad </td>
+			  <td> App Store ID </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:app:name:ipad </td>
+			  <td> appnameipad </td>
+			  <td> a string </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:app:url:ipad </td>
+			  <td> appurlipad </td>
+			  <td> a url </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:app:id:googleplay </td>
+			  <td> appidgoogleplay </td>
+			  <td> Google Play ID </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:app:name:googleplay </td>
+			  <td> appnamegoogleplay </td>
+			  <td> a string </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:app:url:googleplay </td>
+			  <td> appurlgoogleplay </td>
+			  <td> a url </td>
+			  <td> empty </td>
+			</tr>
+		  </tbody>
+		  <tbody>
+			<tr>
+			  <td> twitter:player </td>
+			  <td> player </td>
+			  <td> a url </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:player:width </td>
+			  <td> playerwidth </td>
+			  <td> a integer </td>
+			  <td> empty </td>
+			</tr>
+			<tr>
+			  <td> twitter:player:height </td>
+			  <td> playerheight </td>
+			  <td> a integer </td>
+			  <td> emtpy </td>
+			</tr>
+			<tr>
+			  <td> twitter:player:stream </td>
+			  <td> playerstream </td>
+			  <td> a video url </td>
+			  <td> emtpy </td>
+			</tr>
+			<tr>
+			  <td> twitter:player:stream:content_type </td>
+			  <td> playerstreamcontenttype </td>
+			  <td>
+				 a 
+				<span class="caps">MIME</span>
+				 type 
+			  </td>
+			  <td> emtpy </td>
+			</tr>
+		  </tbody>
+		</table>
+
+		<h2>Special Attributes</h2>
+
+		<table>
+		<tr>
+			<th>Attribute </th>
+			<th>Values </th>
+			<th>Defaults </th>
+			<th>Description </th>
+		</tr>
+		<tr>
+			<td> onlytwitteragent </td>
+			<td> 0 or 1 </td>
+			<td> 1 </td>
+			<td> if set to <em>1</em> renders meta elements only for <span class="caps">HTTP</span> user agent &#8220;Twitterbot&#8221; </td>
+		</tr>
+		<tr>
+			<td> imagedefault </td>
+			<td> a picture url </td>
+			<td> empty </td>
+			<td> if ther is no article image the given url is used for twitter:image </td>
+		</tr>
+	</table>
+	</section>
+	
+	<section>
+	<h1>License</h1>
+
+	<h2>Own Source Code</h2>
+
+	<p>This software (without included parts, see below) is licensed under the following <span class="caps">GPL</span> license:</p>
+
+	<pre> * Copyright 2012, 2014 Sebastian Spautz
+ *
+ * Textpattern Twitter Cards Plugin is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * see http://www.gnu.org/licenses/.
+</pre>
+
+	<h2>Inserted Source Codes</h2>
+
+	<p>This software includes the <span class="caps">PHP</span> library <a href="http://sourceforge.net/projects/absoluteurl/" rel="nofollow">UrlToAbsolute</a>.<br />
+		The library is licensed under the following <span class="caps">BSD</span> license:</p>
+
+	<pre> * Copyright (c) 2008, David R. Nadeau, NadeauSoftware.com.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ *	* Redistributions of source code must retain the above copyright
+ *	  notice, this list of conditions and the following disclaimer.
+ *
+ *	* Redistributions in binary form must reproduce the above
+ *	  copyright notice, this list of conditions and the following
+ *	  disclaimer in the documentation and/or other materials provided
+ *	  with the distribution.
+ *
+ *	* Neither the names of David R. Nadeau or NadeauSoftware.com, nor
+ *	  the names of its contributors may be used to endorse or promote
+ *	  products derived from this software without specific prior
+ *	  written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+ * OF SUCH DAMAGE.
+ *
+ *
+ * This is a BSD License approved by the Open Source Initiative (OSI).
+ * See:  http://www.opensource.org/licenses/bsd-license.php
+</pre>
+	</section>
+	
+	<section>
+		<h1>ChangeLog</h1>
+		<ul>
+			<li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-2-1.php">0.2.1</a>:</em> Check if Title or Description are empty strings</li>
+			<li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-2-0.php">0.2.0</a>:</em> Add card type *summary_large_image* to documentation; implement card type *app* and the *deep-linking feature* of twitter cards</li>
+			<li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-1-4.php">0.1.4</a>:</em> Some Refactoring (compatible width Textpattern 4.5.1)</li>
+			<li><em>0.1.3:</em> Restructuring the code to get the twitter:image value</li>
+			<li><em>0.1.2:</em> Fix a bug width case sensitve attribute names</li>
+			<li><em>0.1.1:</em> Fix a bug setting twitter:image to the dokuments permalink</li>
+			<li><em>0.1.0:</em> First beta Release</li>
+		</ul>
+    </section>
+	
+  </article>
+  <footer>
+    <a href="http://human-injection.de/imprint/">Impressum</a>
+  </footer>
+  </body>
+</html>
