@@ -69,7 +69,7 @@ $plugin['name'] = 'shs_twittercards';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '0.1.4';
+$plugin['version'] = '0.2.0';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Creates Meta-Elements to include Twitter Cards into your pages.';
@@ -94,9 +94,9 @@ if (0) {
 ?>
 # --- BEGIN PLUGIN HELP ---
 
-h1. Textpattern Twitter Cards Plugin (Version 0.1.4)
+h1. Textpattern Twitter Cards Plugin (Version 0.2.0)
 
-This plugin for Textpattern 4.5.1 implements the Twitter Cards format. "Twitter Cards":https://dev.twitter.com/docs/cards is a meta data format to improve the user experience sharing websites on Twitter. For more information about Twitter Cards see https://dev.twitter.com/docs/cards.
+This plugin for Textpattern 4.5.4 implements the Twitter Cards format (the version from 2013-05-08). "Twitter Cards":https://dev.twitter.com/docs/cards is a meta data format to improve the user experience sharing websites on Twitter. For more information about Twitter Cards see https://dev.twitter.com/docs/cards.
 
 The only tag defined in this plugin is @<txp:shs_twittercards>@. It works only inside a single article scope. In article lists you need to implement Twitter Cards manually.
 
@@ -115,17 +115,30 @@ h2. Attributes
 Each Property in Twitter Cards corresponds with an Attribute for @<txp:shs_twittercards>@:
 
 |_. Property |_. Attribute |_. Values |_. Defaults |
-| twitter:card | cardtype | summary, photo or player | summary |
+|-(general).
+| twitter:card | cardtype | summary, summary_large_image, photo, app or player | summary |
 | twitter:site | site | a twitter Name | empty |
 | twitter:site:id | siteid | a twitter user ID | empty |
 | twitter:creator | creator | a twitter Name | empty |
 | twitter:creator:id | creatorid | a twitter user ID | empty |
-| twitter:url | url | a absolute url | textpattern permalink |
-| twitter:description | description | a text | excerpt of the article (HTML element are striped out) |
+|-(summary).
 | twitter:title | title | a raw text | article title |
+| twitter:description | description | a text | excerpt of the article (HTML element are striped out) |
 | twitter:image | image | a picture url | article picture if exitst |
+|-(photo).
 | twitter:image:width | imagewidth | a integer | empty |
 | twitter:image:height | imageheight | a integer | emtpy |
+|-(app).
+| twitter:app:id:iphone | appidiphone | App Store ID | empty |
+| twitter:app:name:iphone | appnameiphone | a string | empty |
+| twitter:app:url:iphone | appurliphone | u url | empty |
+| twitter:app:id:ipad | appidipad | App Store ID | empty |
+| twitter:app:name:ipad | appnameipad | a string | empty |
+| twitter:app:url:ipad | appurlipad | a url | empty |
+| twitter:app:id:googleplay | appidgoogleplay | Google Play ID | empty |
+| twitter:app:name:googleplay | appnamegoogleplay | a string | empty |
+| twitter:app:url:googleplay | appurlgoogleplay | a url | empty |
+|-(player).
 | twitter:player | player | a url | empty |
 | twitter:player:width | playerwidth | a integer | empty |
 | twitter:player:height | playerheight | a integer | emtpy |
@@ -206,6 +219,7 @@ h2. ChangeLog
 * _0.1.2:_ Fix a bug width case sensitve attribute names
 * _0.1.3:_ Restructuring the code to get the twitter:image value
 * _0.1.4:_ Some Refactoring
+* _0.2.0:_ Add card type *summary_large_image* to documentation; implement card type *app* and the *deep-linking feature* of twitter cards
 # --- END PLUGIN HELP ---
 <?php
 }
@@ -223,13 +237,24 @@ function shs_twittercards($atts) {
 			'siteid' => '',
 			'creator' => '',
 			'creatorid' => '',
-			'url' => processTags('permlink', ''),
+			//'url' => processTags('permlink', ''),
 			'description' => $GLOBALS['thisarticle']['excerpt'],
 			'title' => $GLOBALS['thisarticle']['title'],
 			'image' => '',
 			'imagedefault' => '',
 			'imagewidth' => '',
 			'imageheight' => '',
+			
+			'appidiphone' => '',
+			'appnameiphone' => '',
+			'appurliphone' => '',
+			'appidipad' => '',
+			'appnameipad' => '',
+			'appurlipad' => '',
+			'appidgoogleplay' => '',
+			'appnamegoogleplay' => '',
+			'appurlgoogleplay' => '',
+			
 			'player' => '',
 			'playerwidth' => '',
 			'playerheight' => '',
@@ -296,8 +321,12 @@ function shs_twittercards($atts) {
 			if ($creatorid != '') 
 				$returnvalue = $returnvalue.'<meta name="twitter:creator:id" content="'.$creatorid.'" /> ';
 			
-			if ($url != '') 
-				$returnvalue = $returnvalue.'<meta name="twitter:url" content="'.$url.'" /> ';
+			$returnvalue .= renderAppProperties($appiphone, $appipad, $appgoogleplay);
+			
+			//URL is no longer part of the specification
+			//if ($url != '') 
+			//	$returnvalue = $returnvalue.'<meta name="twitter:url" content="'.$url.'" /> ';
+			
 			if ($description != '') 
 				$returnvalue = $returnvalue.'<meta name="twitter:description" content="'.trim(strip_tags($description)).'" /> ';
 			if ($title != '') 
@@ -312,7 +341,9 @@ function shs_twittercards($atts) {
 					$returnvalue = $returnvalue.'<meta name="twitter:image:height" content="'.$imageheight.'" /> ';
 				}
 			}
-				
+			
+			
+			
 			if ($player != '') {
 				$returnvalue = $returnvalue.'<meta name="twitter:player:height" content="'.$player.'" /> ';
 				$returnvalue = $returnvalue.'<meta name="twitter:player:width" content="'.$playerwidth.'" /> ';
@@ -329,6 +360,41 @@ function shs_twittercards($atts) {
 			return "<!-- no TwitterCard include for normal Browsers -->";
 		}
 	}
+}
+
+function renderAppProperties($idIPhoneApp, $nameIPhoneApp, $urlIPhoneApp
+		, $idIPadApp, $nameIPadApp, $urlIPadApp
+		, $idGoolePlaystoreApp, $nameGoolePlaystoreApp, $urlGoolePlaystoreApp) {
+		
+	$returnvalue = '<!-- Twitter App/Deep linking properties--> ';    
+	if ($idIPhoneApp != '') {
+		$returnvalue .= '<meta name="twitter:app:id:iphone" content="'. $idIPhoneApp .'"> ';
+	}
+	if ($nameIPhoneApp != '') {
+	  $returnvalue .= '<meta name="twitter:app:name:iphone" content="'. $nameIPhoneApp .'"> ';
+	}
+	if ($urlIPhoneApp != '') {
+	  $returnvalue .= '<meta name="twitter:app:url:iphone" content="'. $urlIPhoneApp .'"> ';
+	}
+	if ($idIPadApp != '') {
+		$returnvalue .= '<meta name="twitter:app:id:ipad" content="'. $idIPadApp .'"> ';
+	}
+	if ($nameIPadApp != '') {
+	  $returnvalue .= '<meta name="twitter:app:name:ipad" content="'. $nameIPadApp .'"> ';
+	}
+	if ($urlIPhoneApp != '') {
+	  $returnvalue .= '<meta name="twitter:app:url:ipad" content="'. $urlIPadApp .'"> ';
+	}
+	if ($idGoolePlaystoreApp != '') {
+		$returnvalue .= '<meta name="twitter:app:id:googleplay" content="'. $idGoolePlaystoreApp .'"> ';
+	}
+	if ($nameGoolePlaystoreApp != '') {
+	  $returnvalue .= '<meta name="twitter:app:name:googleplay" content="'. $nameGoolePlaystoreApp .'"> ';
+	}
+	if ($urlGoolePlaystoreApp != '') {
+	  $returnvalue .= '<meta name="twitter:app:url:googleplay" content="'. $urlGoolePlaystoreApp .'"> ';
+	}
+	return $returnvalue;
 }
 
 function isTwitterAgent() {
