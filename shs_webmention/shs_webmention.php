@@ -27,7 +27,7 @@ $plugin['name'] = 'shs_webmention';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '0.1.0';
+$plugin['version'] = '0.2.0';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Implements a receiver for webmentions.';
@@ -52,7 +52,7 @@ if (0) {
 ?>
 # --- BEGIN PLUGIN HELP ---
 
-h1. Textpattern Webmention Plugin (Version 0.1.0)
+h1. Textpattern Webmention Plugin (Version 0.2.0)
 
 This plugin for Textpattern 4.5.4 implements a receiver for the webmention specification. 
 Webmention is a simple technology to notify any URL when you link to it on your site. 
@@ -86,9 +86,9 @@ bc. <link rel="webmention" href="http://human-injection.de/webmention.php"/>
 h2. TODO
 
 * Get Informations from Source (microformats ec.)
-* Implement Frontent to send Webmentions
+* Implement Frontend to send Webmentions
 * Make it configurable
-* Follow Redirects
+* Follow redirects
 
 h2. License
 
@@ -112,6 +112,7 @@ This Plugin use some code from https://gist.github.com/adactio/6484118.
  
 h2. ChangeLog
 
+* _0.2.0:_ Updates existing webmentions instead of generating dublicates
 * _0.1.0:_ First Release
 # --- END PLUGIN HELP ---
 <?php
@@ -146,8 +147,8 @@ function shs_webmention_receive() {
 	$sourceContent = ob_get_contents();
 	ob_end_clean();
 	
-	$ip = doSlash(serverset('REMOTE_ADDR'));
-	$parentId = 84;
+	# generate parameters for new/updated textpattern comment
+	$parentId = 84; //Change this to the id of your dummy article for all mentions targeting a article list or other content of your blog
 	$parentUrlTitle = explode('?', $target);
 	$parentUrlTitle = explode('/', $parentUrlTitle[0]);
 	$parentUrlTitle = array_reverse($parentUrlTitle);
@@ -155,19 +156,29 @@ function shs_webmention_receive() {
 	if ($detectedParent != false) {
 		$parentId = $detectedParent["ID"];
 	}
+	$commentId = -1; //If an comment allways represent this webmention the ID of this comment is detected
+	$detectedComment = safe_row ( "discussid", "txp_discuss", "parentid='".$parentId."' AND web='".$source."' AND message LIKE '<div class=\"webmention\">%'", false );
+	if ($detectedComment != false) {
+		$commentId = $detectedComment["discussid"];
+	}
+	$ip = doSlash(serverset('REMOTE_ADDR'));
 	$status = 0; //Please Moderate this Comment
-	$commentMessage = doSlash('<a href="'.$source.'">'.$source.'</a> has send a webmention to '.$target.'.');
-	#$commentMessage = doSlash(markup_comment('Webmention from \"'.$source.'\":'.$source));
+	$commentMessage = doSlash('<div class="webmention"><a href="'.$source.'">'.$source.'</a> has send a webmention to '.$target.'.</div>');
+	
+	# init Message for HTTP-Response
 	$responseMessage = '';
 	
-	if (stristr($sourceContent, $target)) { # Source contains the target URL
+	# Check source for link to target
+	if (stristr($sourceContent, $target)) {
 		$responseMessage = 'Thanks for your mention from '.$source.' to '.$target.'.';
-		
-	} else { # Mention is possibly junk
+	} else {
 		$status = -1; //Junk
         $responseMessage = 'There is no reference on '.$source.' to '.$target.'. This mention is classified as junk.';
     }
-	$rs = safe_insert( 
+	
+	// Save comment to Database
+	if ($commentId <= 0) { //Insert new
+		$rs = safe_insert( 
 			"txp_discuss", 
 			"parentid  = ".$parentId.", 
 			name          = 'Webmention', 
@@ -178,7 +189,20 @@ function shs_webmention_receive() {
 			visible   = ".$status.", 
 			posted      = now()" 
 		); 
-		
+	} else { // update existing
+		$rs = safe_update( 
+			"txp_discuss", 
+			"name          = 'Webmention', 
+			email      = 'webmention@human-injection.de', 
+			web          = '".$source."', 
+			ip          = '".$ip."', 
+			message   = '".$commentMessage."',
+			visible   = ".$status.", 
+			posted      = now()",
+			"discussid = ".$commentId
+		); 
+	}
+	
 	#generate HTTP-Response
 	header($_SERVER['SERVER_PROTOCOL'] . ' 202 Accepted');
 	header('Content-type: text/plain');
@@ -216,6 +240,9 @@ function shs_webmention_receiver_called() {
 	# else
 	return false;
 }
+
+
+
 #-- END Helper Functions --
 
 # --- END PLUGIN CODE ---
