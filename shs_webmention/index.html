@@ -1,0 +1,116 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta name='viewport' content='width=device-width; initial-scale=1.0'  />
+	<meta name="viewport" content="width=device-width" />
+    
+	<meta charset="utf-8" />
+    <title>Textmansion &ndash; Lab &ndash; Human Injection</title>
+
+    <style>
+	body { text-align:center; }
+	header { margin:0 10% 3em 10%; }
+	article { margin:2em 10%; }
+	section { text-align:left; min-width:60%; margin:0 auto 1.4em auto; border:3px solid green; padding:2em;  }
+	footer { margin-top: 5em; clear:both; }
+	h1 { font-size:1.7em; font-weight:bold; }
+	h1:first-child { margin-top: 0; }
+	h2 { font-size: 1.5em; font-weight:bold; }
+	h3 { font-size: 1.2.em; font-weight:bold; }
+	td { border:1px solid green; padding:0.4em; }
+    </style>
+  </head>
+  <body>
+  <header>
+		<h1>Human Injection Laboratories</h1>
+		<h2>Textpattern Webmention Plugin</a></h2> 
+  </header>
+  <article>
+    
+    <section>
+		<h1>Description</h1>
+		<p>This plugin for Textpattern 4.5.4 implements a receiver for the webmention specification.
+			Webmention is a simple technology to notify any <span class="caps">URL</span> when you link to it on your site.
+			For more information about Webmentions see <a href="https://indiewebcamp.com/webmention" rel="nofollow">https://indiewebcamp.com/webmention</a>.
+		</p>
+	</section>
+	
+	<section>
+		<h1>Download</h1>
+		<ul>
+			<li><a href="http://lab.human-injection.de/twittercards/shs_webmention.php">Plugin Version 0.2.2</a></li>
+			<li><a href="https://github.com/sebastiansIT/SHSTextpattern/tree/master/shs_webmention">Source code</a></li>
+		</ul>
+	</section>
+	
+	<section>
+		<h1>Manual</h1>
+		<h2>Basic Usage</h2>
+		<p>The first part of this plugin is the receiver <code>shs_webmention_receive()</code>.
+			It accepted request to the <span class="caps">URL</span>-path <em>webmention.php</em> in your textpattern
+			installation. This requests must submit a <code>source</code> and a <code>target</code> parameter.
+			With this parameters the receiver creates a new comment in the database.
+		</p>
+		<p>If the target of a mention is a article list (searchresult, category listing ec.)
+			the comment is attached to a hard coded dummy article (ID 84). Please change this ID.
+		</p>
+		<p>Second part of the plugin is a Tag (<code>&lt;txp:shs_webmention_discovery /&gt;</code>). This
+			tag generates the Markup and <span class="caps">HTTP</span> header for the endpoint discovery. Please
+			use it in you page template to activate Webmention on you site.
+		</p>
+		
+		<h2>Tags and Attributes</h2>
+		<h3>txp:shs_webmention_discovery</h3>
+		<p>Generates Markup for webmention endpoint discovery. There are no attributes for this tag.</p>
+		<pre><code>&lt;txp:shs_webmention_discovery /&gt;</code></pre>
+		<pre><code>&lt;link rel=&quot;webmention&quot; href=&quot;http://human-injection.de/webmention.php&quot;/&gt;</code></pre>
+
+		<h2><span class="caps">TODO</span></h2>
+		<ul>
+			<li>Get Informations from Source (microformats ec.)</li>
+			<li>Implement Frontend to send Webmentions</li>
+			<li>Make it configurable</li>
+			<li>Follow redirects</li>
+		</ul>
+	</section>
+	
+	<section>
+		<h1>License</h1>
+		<h2>Own Source Code</h2>
+		<p>This software (without included parts, see below) is licensed under the following <span class="caps">GPL</span> license:</p>
+		<pre>* Copyright 2014 Sebastian Spautz
+	 *
+	 * Textpattern Webmention Plugin is free software: you can redistribute it and/or modify
+	 * it under the terms of the GNU General Public License as published by
+	 * the Free Software Foundation, either version 3 of the License, or
+	 * any later version.
+	 *
+	 * This program is distributed in the hope that it will be useful,
+	 * but WITHOUT ANY WARRANTY; without even the implied warranty of
+	 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	 * GNU General Public License for more details.
+	 *
+	 * see http://www.gnu.org/licenses/.
+	</pre>
+
+		<h2>Inserted Source Codes</h2>	
+		<p>This Plugin use some code from https://gist.github.com/adactio/6484118.</p>
+	</section>
+	
+	<section>
+		<h1>ChangeLog</h1>
+		<ul>
+			<li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-2-2.php">0.2.2</a>:</em> Refactoring code</li>
+			<li><em>0.1.1:</em> Fix a simple bug</li>
+			<li><em>0.2.0:</em> Updates existing webmentions instead of generating dublicates</li>
+			<li><em>0.1.0:</em> First Release</li>
+		</ul>
+    </section>
+	
+  </article>
+  <footer>
+    <a href="http://human-injection.de/imprint/">Impressum</a>
+  </footer>
+  </body>
+</html>

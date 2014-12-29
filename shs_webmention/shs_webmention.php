@@ -27,7 +27,7 @@ $plugin['name'] = 'shs_webmention';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '0.2.0';
+$plugin['version'] = '0.2.2';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Implements a receiver for webmentions.';
@@ -52,7 +52,7 @@ if (0) {
 ?>
 # --- BEGIN PLUGIN HELP ---
 
-h1. Textpattern Webmention Plugin (Version 0.2.0)
+h1. Textpattern Webmention Plugin (Version 0.2.2)
 
 This plugin for Textpattern 4.5.4 implements a receiver for the webmention specification. 
 Webmention is a simple technology to notify any URL when you link to it on your site. 
@@ -61,23 +61,23 @@ For more information about Webmentions see "https://indiewebcamp.com/webmention"
 h2. Basic Usage
 
 The first part of this plugin is the receiver @shs_webmention_receive()@. 
-It accepted request to the URL-path _webmention.php_ in your textpattern 
+It accepts request to the URL-path _webmention.php_ in your textpattern 
 installation. This requests must submit a @source@ and a @target@ parameter. 
 With this parameters the receiver creates a new comment in the database.
 
-If the target of a mention is a article list (searchresult, category listing ec.) 
+If the target of a mention is a article list (search result, category listing ec.) 
 the comment is attached to a hard coded dummy article (ID 84). Please change this ID.
 
 Second part of the plugin is a Tag (@<txp:shs_webmention_discovery />@). This 
 tag generates the Markup and HTTP header for the endpoint discovery. Please 
-use it in you page template to activate Webmention on you site.
+use it in you page template to activate Webmention on your site.
 
 h2. Tags and Attributes
 
 h3. txp:shs_webmention_discovery
 
-Generates Markup for webmention endpoint discovery. There are no attributes 
-for this tag.
+Generate markup for webmention endpoint discovery. There are no attributes 
+for this tag available.
 
 bc. <txp:shs_webmention_discovery />
 
@@ -112,8 +112,11 @@ This Plugin use some code from https://gist.github.com/adactio/6484118.
  
 h2. ChangeLog
 
+* _0.2.2:_ Refactoring code
+* _0.2.1:_ Fix a simple bug
 * _0.2.0:_ Updates existing webmentions instead of generating dublicates
 * _0.1.0:_ First Release
+
 # --- END PLUGIN HELP ---
 <?php
 }
@@ -126,84 +129,44 @@ register_callback('shs_webmention_receive','textpattern');
 
 #-- BEGIN Receiver Implementation
 function shs_webmention_receive() {
+	$values = array();
+	$responseMessage = '';
+	
 	if(shs_webmention_receiver_called() == false) {
 		return;
 	}
 	# Get source and target from request
-	$target = gps('target');
-	$source = gps('source');
+	$values['targetUrl'] = gps('target');
+	$values['sourceUrl'] = gps('source');
 	# Check Parameters
-	if ($source == '' || $target == '') {
+	if ($values['sourceUrl'] == '' || $values['targetUrl'] == '') {
 		header($_SERVER['SERVER_PROTOCOL'] . ' 400 Bad Request');
 		exit();
 	}
 	# Get content from source
-	ob_start();
-	$ch = curl_init($source);
-	curl_setopt($ch,CURLOPT_USERAGENT,$pretext['sitename']);
-	curl_setopt($ch,CURLOPT_HEADER,0);
-	$ok = curl_exec($ch);
-	curl_close($ch);
-	$sourceContent = ob_get_contents();
-	ob_end_clean();
-	
+	$sourceContent = shs_getSource($values['sourceUrl']);
 	# generate parameters for new/updated textpattern comment
-	$parentId = 84; //Change this to the id of your dummy article for all mentions targeting a article list or other content of your blog
-	$parentUrlTitle = explode('?', $target);
-	$parentUrlTitle = explode('/', $parentUrlTitle[0]);
-	$parentUrlTitle = array_reverse($parentUrlTitle);
-	$detectedParent = safe_row ( "ID", "textpattern", "url_title='".$parentUrlTitle[0]."'", false );
-	if ($detectedParent != false) {
-		$parentId = $detectedParent["ID"];
-	}
-	$commentId = -1; //If an comment allways represent this webmention the ID of this comment is detected
-	$detectedComment = safe_row ( "discussid", "txp_discuss", "parentid='".$parentId."' AND web='".$source."' AND message LIKE '<div class=\"webmention\">%'", false );
-	if ($detectedComment != false) {
-		$commentId = $detectedComment["discussid"];
-	}
-	$ip = doSlash(serverset('REMOTE_ADDR'));
-	$status = 0; //Please Moderate this Comment
-	$commentMessage = doSlash('<div class="webmention"><a href="'.$source.'">'.$source.'</a> has send a webmention to '.$target.'.</div>');
+	$values['parentId'] = shs_getArticleId($values['targetUrl'], 84); //Change second parameter to the id of your dummy article for all mentions targeting a article list or other content of your blog
+	$values['commentId'] = shs_getCommentId($values['sourceUrl'], $values['parentId']); //If a comment allways represent this webmention the ID of this comment is detected
+	$values['ip'] = doSlash(serverset('REMOTE_ADDR'));
+	$values['status'] = 0; //Please Moderate the generated Comment
+	$values['name'] = 'Webmention';
+	$values['email'] = 'webmention@'.$_SERVER['SERVER_NAME'];
+	$values['commentMessage'] = doSlash('<div class="webmention"><a href="'.$values['sourceUrl'].'">'.$values['sourceUrl'].'</a> has send a webmention to '.$values['targetUrl'].'.</div>');
+	#$sourceInfo = shs_parse_microformats($values['sourceUrl']);
+	#if (array_key_exists('title', $sourceInfo) == true) {
+	#	$values['name'] = $sourceInfo['title'];
+	#}
 	
-	# init Message for HTTP-Response
-	$responseMessage = '';
-	
-	# Check source for link to target
-	if (stristr($sourceContent, $target)) {
-		$responseMessage = 'Thanks for your mention from '.$source.' to '.$target.'.';
+	# Spam-Check
+	if (stristr($sourceContent, $values['targetUrl'])) {
+		$responseMessage = 'Thanks for your mention from '.$values['sourceUrl'].' to '.$values['targetUrl'].'.';
 	} else {
-		$status = -1; //Junk
-        $responseMessage = 'There is no reference on '.$source.' to '.$target.'. This mention is classified as junk.';
-    }
-	
-	// Save comment to Database
-	if ($commentId <= 0) { //Insert new
-		$rs = safe_insert( 
-			"txp_discuss", 
-			"parentid  = ".$parentId.", 
-			name          = 'Webmention', 
-			email      = 'webmention@human-injection.de', 
-			web          = '".$source."', 
-			ip          = '".$ip."', 
-			message   = '".$commentMessage."',
-			visible   = ".$status.", 
-			posted      = now()" 
-		); 
-	} else { // update existing
-		$rs = safe_update( 
-			"txp_discuss", 
-			"name          = 'Webmention', 
-			email      = 'webmention@human-injection.de', 
-			web          = '".$source."', 
-			ip          = '".$ip."', 
-			message   = '".$commentMessage."',
-			visible   = ".$status.", 
-			posted      = now()",
-			"discussid = ".$commentId
-		); 
-	}
-	
-	#generate HTTP-Response
+		$values['status'] = -1; //Junk
+        $responseMessage = 'There is no reference on '.$values['sourceUrl'].' to '.$values['targetUrl'].'. This mention is classified as junk.';
+    }	
+	shs_saveComment($values);
+	# Generate HTTP-Response
 	header($_SERVER['SERVER_PROTOCOL'] . ' 202 Accepted');
 	header('Content-type: text/plain');
 	echo $responseMessage;
@@ -240,11 +203,90 @@ function shs_webmention_receiver_called() {
 	# else
 	return false;
 }
-
-
-
+function shs_getArticleId($targetUrl, $default) {
+	$articleUrlTitle = explode('?', $targetUrl);
+	$articleUrlTitle = explode('/', $articleUrlTitle[0]);
+	$articleUrlTitle = array_reverse($articleUrlTitle);
+	$detectedParent = safe_row( "ID", "textpattern", "url_title='".$articleUrlTitle[0]."'", false );
+	if ($detectedParent != false) {
+		return $detectedParent["ID"];
+	} else {
+		return $default;
+	}
+}
+function shs_getCommentId($sourceUrl, $parentId) {
+	$detectedComment = safe_row( "discussid", "txp_discuss", "parentid='".$parentId."' AND web='".$sourceUrl."' AND message LIKE '<div class=\"webmention\">%'", false );
+	if ($detectedComment != false) {
+		return $detectedComment["discussid"];
+	} else {
+		return -1;
+	}
+}
+function shs_saveComment($values) {
+	if ($values['commentId'] <= 0) { # Insert new
+		$rs = safe_insert( 
+			"txp_discuss", 
+			"parentid  = ".$values['parentId'].", 
+			name          = '".$values['name']."', 
+			email      = '".$values['email']."', 
+			web          = '".$values['sourceUrl']."', 
+			ip          = '".$values['ip']."', 
+			message   = '".$values['commentMessage']."',
+			visible   = ".$values['status'].", 
+			posted      = now()" 
+		); 
+	} else { # Update existing
+		$rs = safe_update( 
+			"txp_discuss", 
+			"name          = '".$values['name']."',  
+			email      = '".$values['email']."',  
+			web          = '".$values['sourceUrl']."', 
+			ip          = '".$values['ip']."', 
+			message   = '".$values['commentMessage']."',
+			visible   = ".$values['status'].", 
+			posted      = now()",
+			"discussid = ".$values['commentId']
+		); 
+	}
+}
+function shs_getSource($sourceUrl) {
+	global $pretext;
+	
+	ob_start();
+	$ch = curl_init($sourceUrl);
+	curl_setopt($ch,CURLOPT_USERAGENT,$pretext['sitename']);
+	curl_setopt($ch,CURLOPT_HEADER,0);
+	$ok = curl_exec($ch);
+	curl_close($ch);
+	$sourceContent = ob_get_contents();
+	ob_end_clean();
+	
+	return $sourceContent;
+}
+#function shs_parse_microformats($source) {
+	# https://pin13.net/mf2/?url=http%3A%2F%2Fhuman-injection.de%2Farticles%2Ftwittercards
+	# https://mf2py.herokuapp.com/parse?url=http%3A%2F%2Fhuman-injection.de%2Farticles%2Ftwittercards
+	#ob_start();
+	#$ch = curl_init("https://mf2py.herokuapp.com/parse?url=".$source);
+	#curl_setopt($ch,CURLOPT_USERAGENT,$pretext['sitename']);
+	#curl_setopt($ch,CURLOPT_HEADER,0);
+	#$ok = curl_exec($ch);
+	#curl_close($ch);
+	#$microformatsContent = ob_get_contents();
+	#ob_end_clean();
+	
+	#$microformatsContent = json_decode($microformatsContent, true);
+	#$result = array();
+	
+	#for ($i = 0; i < count($microformatsContent['items']); $i++) {
+	#	$item = $microformatsContent['items'][$i];
+	#	if (in_array('h-entry', $item['type']) == true) {
+	#		$result['title'] = $item['properties']['name'][0];
+	#	}
+	#}
+	#return $result;
+#}
 #-- END Helper Functions --
 
 # --- END PLUGIN CODE ---
-
 ?>
