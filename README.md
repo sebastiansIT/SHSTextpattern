@@ -28,6 +28,11 @@ This plugin defines a number of tags to handle the differences between HTML and 
 * [Manual](http://lab.human-injection.de/textpatternxhtmlhelper/)
 * [Installation](http://lab.human-injection.de/textpatternxhtmlhelper/shs_xhtml_helpers.php)
 
+## [shs_categoryhelpers](shs_categoryhelpers)
+
+This plugin for Textpattern 4.5.4 defines some Tags to generate category relatet markup for my [own Weblog](human-injection.de).
+
+Currently it generates a link for each ancestor of the two article categories and combine them.
 
 # Resources on creating Textpattern plugins
 * [Overview](http://textbook.textpattern.net/wiki/index.php?title=Plugin_Development_Topics)
