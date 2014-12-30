@@ -55,6 +55,13 @@
 		<p>If the target of a mention is a article list (searchresult, category listing ec.)
 			the comment is attached to a hard coded dummy article (ID 84). Please change this ID.
 		</p>
+		<p>The source is checked for a link to the target. Also it checks the type of the webmention. The following values in class or rel attributes are checked:</p>
+		<ul>
+			<li>in-reply-to</li>
+			<li>u-in-reply-to</li>
+			<li>u-like-of</li>
+			<li>u-repost-of</li>
+		</ul>
 		<p>Second part of the plugin is a Tag (<code>&lt;txp:shs_webmention_discovery /&gt;</code>). This
 			tag generates the Markup and <span class="caps">HTTP</span> header for the endpoint discovery. Please
 			use it in you page template to activate Webmention on you site.
@@ -101,6 +108,7 @@
 	<section>
 		<h1>ChangeLog</h1>
 		<ul>
+			<li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-3-0.php">0.3.0</a>:</em> Checks Type of webmention (reply, like, repost or simple link)</li>
 			<li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-2-2.php">0.2.2</a>:</em> Refactoring code</li>
 			<li><em>0.1.1:</em> Fix a simple bug</li>
 			<li><em>0.2.0:</em> Updates existing webmentions instead of generating dublicates</li>

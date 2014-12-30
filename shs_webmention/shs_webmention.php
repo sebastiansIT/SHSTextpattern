@@ -27,7 +27,7 @@ $plugin['name'] = 'shs_webmention';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '0.2.2';
+$plugin['version'] = '0.3.0';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Implements a receiver for webmentions.';
@@ -52,7 +52,7 @@ if (0) {
 ?>
 # --- BEGIN PLUGIN HELP ---
 
-h1. Textpattern Webmention Plugin (Version 0.2.2)
+h1. Textpattern Webmention Plugin (Version 0.3.0)
 
 This plugin for Textpattern 4.5.4 implements a receiver for the webmention specification. 
 Webmention is a simple technology to notify any URL when you link to it on your site. 
@@ -67,6 +67,13 @@ With this parameters the receiver creates a new comment in the database.
 
 If the target of a mention is a article list (search result, category listing ec.) 
 the comment is attached to a hard coded dummy article (ID 84). Please change this ID.
+
+The source is checked for a link to the target. Also it checks the type of the webmention. The following values in class or rel attributes are checked:
+
+* in-reply-to
+* u-in-reply-to
+* u-like-of
+* u-repost-of
 
 Second part of the plugin is a Tag (@<txp:shs_webmention_discovery />@). This 
 tag generates the Markup and HTTP header for the endpoint discovery. Please 
@@ -112,6 +119,7 @@ This Plugin use some code from https://gist.github.com/adactio/6484118.
  
 h2. ChangeLog
 
+* _0.3.0:_ Checks Type of webmention (reply, like, repost or simple link)
 * _0.2.2:_ Refactoring code
 * _0.2.1:_ Fix a simple bug
 * _0.2.0:_ Updates existing webmentions instead of generating dublicates
@@ -152,15 +160,37 @@ function shs_webmention_receive() {
 	$values['status'] = 0; //Please Moderate the generated Comment
 	$values['name'] = 'Webmention';
 	$values['email'] = 'webmention@'.$_SERVER['SERVER_NAME'];
-	$values['commentMessage'] = doSlash('<div class="webmention"><a href="'.$values['sourceUrl'].'">'.$values['sourceUrl'].'</a> has send a webmention to '.$values['targetUrl'].'.</div>');
-	#$sourceInfo = shs_parse_microformats($values['sourceUrl']);
-	#if (array_key_exists('title', $sourceInfo) == true) {
-	#	$values['name'] = $sourceInfo['title'];
-	#}
+	$values['commentMessage'] = '<div class="webmention">%%content%%</div>';
 	
 	# Spam-Check
-	if (stristr($sourceContent, $values['targetUrl'])) {
+	#if (stristr($sourceContent, $values['targetUrl'])) {
+	if (preg_match_all('/<a[^>]*href=["|\']'.str_replace(array('.', '/'), array('\.', '\/'), $values['targetUrl']).'["|\'][^>]*>/', $sourceContent, $links) > 0) {
+		$types = array();
+		for ($i = 0; $i < count($links[0]); $i++) {
+			//General Rel/Class-Value selector: (rel|class)=["|\']((\w|-)*(\s(\w|-)*)*)["|\']
+			if (preg_match_all('/(rel|class)=["|\']((\w|-)*\s?)*(u-)?in-reply-to(\s?(\w|-)*)*["|\']/', $links[0][$i], $rel) > 0) {
+				$values['types'][] = "reply";
+				$values['commentMessage'] = str_replace('%%content%%', '<p class="reply"><a rel="nofollow" href="'.$values['sourceUrl'].'">'.$values['sourceUrl'].'</a> is a reply to <a href="'.$values['targetUrl'].'">this Article</a>.</p>%%content%%', $values['commentMessage']);
+			}
+			if (preg_match_all('/(rel|class)=["|\']((\w|-*)\s?)*u-like-of(\s?(\w|-)*)*["|\']/', $links[0][$i], $rel) > 0) {
+				$values['types'][] = "like";
+				$values['commentMessage'] = str_replace('%%content%%', '<p class="like"><a href="'.$values['targetUrl'].'">this Article</a> is liked on <a rel="nofollow" href="'.$values['sourceUrl'].'">'.$values['sourceUrl'].'</a>.</p>%%content%%', $values['commentMessage']);
+			}
+			if (preg_match_all('/(rel|class)=["|\']((\w|-)*\s?)*u-repost-of(\s?(\w|-)*)*["|\']/', $links[0][$i], $rel) > 0) {
+				$values['types'][] = "repost";
+				$values['commentMessage'] = str_replace('%%content%%', '<p class="repost"><a rel="nofollow" href="'.$values['sourceUrl'].'">'.$values['sourceUrl'].'</a> is a repost of <a href="'.$values['targetUrl'].'">this Page</a>.</p>%%content%%', $values['commentMessage']);
+			}
+		}
+		if (count($values['types']) == 0) {
+			$values['types'][] = "link";
+			$values['commentMessage'] = doSlash(str_replace('%%content%%', '<p><a href="'.$values['targetUrl'].'">this Page</a> is linked on <a rel="nofollow" href="'.$values['sourceUrl'].'">'.$values['sourceUrl'].'</a>.</p>', $values['commentMessage']));
+		} else {
+			$values['commentMessage'] = doSlash(str_replace('%%content%%', '', $values['commentMessage']));
+		}
+		
 		$responseMessage = 'Thanks for your mention from '.$values['sourceUrl'].' to '.$values['targetUrl'].'.';
+		$responseMessage .= " ".count($links)." found in source.";
+		$responseMessage .= " Following types of webmention found in source: ".implode(", ",$values['types']);
 	} else {
 		$values['status'] = -1; //Junk
         $responseMessage = 'There is no reference on '.$values['sourceUrl'].' to '.$values['targetUrl'].'. This mention is classified as junk.';
