@@ -1,3 +1,5 @@
+<img src="http://human-injection.de/images/26.png" title="Logo of SHS Textpattern Plugins" style="float:left;" />
+
 # SHS Textpattern Plugins
 
 My Collection of Textpattern Plugins
