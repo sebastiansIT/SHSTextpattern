@@ -6,3 +6,8 @@ This plugin defines a number of tags to handle the differences between HTML and 
 
 * [Manual](http://lab.human-injection.de/textpatternxhtmlhelper/)
 * [Installation](http://lab.human-injection.de/textpatternxhtmlhelper/shs_xhtml_helpers.php)
+
+### Changelog
+
+* 0.9.0: Register the custom tags to avoid a warning in debug mode of Textpattern
+* 0.8.3: First public release

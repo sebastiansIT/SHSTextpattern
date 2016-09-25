@@ -1,5 +1,5 @@
 <?php
-	// Copyright 2011 Sebastian Spautz
+	// Copyright 2011, 2016 Sebastian Spautz
 	
 	// "Textpattern XHTML Helper Plugin" is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ $plugin['name'] = 'shs_xhtml_helpers';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '0.8.3';
+$plugin['version'] = '0.9.0';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Define Tags to handle XML-Declaration, DOCTYPE and other specifice elements of XHTML.';
@@ -166,7 +166,7 @@ h2. Licence
 
 This software is licensed under the following GPL license:
 
-pre.  * Copyright 2011 Sebastian Spautz
+pre.  * Copyright 2011, 2016 Sebastian Spautz
  *
  * Textpattern Webmention Plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -308,6 +308,17 @@ function manipulateTypeCallback($buffer) {
 		header("content-type: text/html; charset=utf-8");
 	}
 	return $buffer;
+}
+
+if (class_exists('\Textpattern\Tag\Registry')) {
+	Txp::get('\Textpattern\Tag\Registry')
+		->register('shs_xml_declaration')
+		->register('shs_doctype')
+		->register('shs_namespace')
+        ->register('shs_language')
+        ->register('shs_content_type')
+        ->register('shs_if_xhtml_accepted')
+	;
 }
 
 # --- END PLUGIN CODE ---

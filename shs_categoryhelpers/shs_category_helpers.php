@@ -1,5 +1,5 @@
 ﻿<?php
-	// Copyright 2013 Sebastian Spautz
+	// Copyright 2013, 2016 Sebastian Spautz
 	
 	// "Sebastians Textpattern Category Helpers" is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ $plugin['name'] = 'shs_category_helpers';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '1.0.0';
+$plugin['version'] = '1.1.0';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Helper-Tags to handle categories';
@@ -53,7 +53,7 @@ if (0) {
 
 # --- BEGIN PLUGIN HELP ---
 
-h1. Sebastians Textpattern Category Helpers (Version 1.0.0)
+h1. Sebastians Textpattern Category Helpers (Version 1.1.0)
 
 This plugin for Textpattern 4.5.4 defines some Tags to generate category relatet markup for my own Weblog human-injection.de.
 
@@ -78,6 +78,7 @@ pre.  * Copyright 2013 Sebastian Spautz
  * see http://www.gnu.org/licenses/.
 
 h2. ChangeLog
+* _1.1.0:_ Register the custom tags to avoid a warning in debug mode of Textpattern
 * _1.0.0:_ First Release
 # --- END PLUGIN HELP ---
 
@@ -157,5 +158,11 @@ function shs_ancestors_categories($atts, $thing='') {
 		return $out;
 	}
 } //end of function shs_ancestors_categories($atts)
+
+if (class_exists('\Textpattern\Tag\Registry')) {
+	Txp::get('\Textpattern\Tag\Registry')
+		->register('shs_ancestors_categories')
+	;
+}
 # --- END PLUGIN CODE ---
 ?>

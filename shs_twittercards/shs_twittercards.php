@@ -1,5 +1,5 @@
 <?php
-	// Copyright 2012, 2014 Sebastian Spautz
+	// Copyright 2012, 2014, 2016 Sebastian Spautz
 	
 	// "Textpattern Twitter Cards Plugin" is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ $plugin['name'] = 'shs_twittercards';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '0.2.1';
+$plugin['version'] = '0.3.0';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Creates Meta-Elements to include Twitter Cards into your pages.';
@@ -94,7 +94,7 @@ if (0) {
 ?>
 # --- BEGIN PLUGIN HELP ---
 
-h1. Textpattern Twitter Cards Plugin (Version 0.2.´1)
+h1. Textpattern Twitter Cards Plugin (Version 0.3.0)
 
 This plugin for Textpattern 4.5.4 implements the Twitter Cards format (the version from 2013-05-08). "Twitter Cards":https://dev.twitter.com/docs/cards is a meta data format to improve the user experience sharing websites on Twitter. For more information about Twitter Cards see https://dev.twitter.com/docs/cards.
 
@@ -221,6 +221,7 @@ h2. ChangeLog
 * _0.1.4:_ Some Refactoring (compatible width Textpattern 4.5.1)
 * _0.2.0:_ Add card type *summary_large_image* to documentation; implement card type *app* and the *deep-linking feature* of twitter cards
 * _0.2.1:_ Check if Title or Description are empty strings
+* _0.3.0:_ Register the custom tags to avoid a warning in debug mode of Textpattern
 # --- END PLUGIN HELP ---
 <?php
 }
@@ -902,7 +903,11 @@ function encode_url($url) {
   return $url;
 }
 
-
+if (class_exists('\Textpattern\Tag\Registry')) {
+	Txp::get('\Textpattern\Tag\Registry')
+		->register('shs_twittercards')
+	;
+}
 
 # --- END PLUGIN CODE ---
 
