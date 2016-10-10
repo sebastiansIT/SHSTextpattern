@@ -69,7 +69,7 @@ $plugin['name'] = 'shs_twittercards';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '0.3.0';
+$plugin['version'] = '0.3.1';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Creates Meta-Elements to include Twitter Cards into your pages.';
@@ -94,9 +94,9 @@ if (0) {
 ?>
 # --- BEGIN PLUGIN HELP ---
 
-h1. Textpattern Twitter Cards Plugin (Version 0.3.0)
+h1. Textpattern Twitter Cards Plugin (Version 0.3.1)
 
-This plugin for Textpattern 4.5.4 implements the Twitter Cards format (the version from 2013-05-08). "Twitter Cards":https://dev.twitter.com/docs/cards is a meta data format to improve the user experience sharing websites on Twitter. For more information about Twitter Cards see https://dev.twitter.com/docs/cards.
+This plugin for Textpattern 4.6 implements the Twitter Cards format (the version from 2013-05-08). "Twitter Cards":https://dev.twitter.com/docs/cards is a meta data format to improve the user experience sharing websites on Twitter. For more information about Twitter Cards see https://dev.twitter.com/docs/cards.
 
 The only tag defined in this plugin is @<txp:shs_twittercards>@. It works only inside a single article scope. In article lists you need to implement Twitter Cards manually.
 
@@ -107,7 +107,7 @@ The basic usage of @<txp:shs_twittercards />@ creates some basic Meta-Elements f
 bc. <meta name="twitter:card" content="summary">
 <meta name="twitter:url" content="{Permalink of the article}">
 <meta name="twitter:title" content="{Title of the article}">
-<meta name="twitter:description" content="{Exceprt of the article (HTML element are striped out)}">
+<meta name="twitter:description" content="{Excerpt of the article (HTML element are striped out)}">
 <meta name="twitter:image" content="{Article image (if exists)}">
 
 h2. Attributes
@@ -123,7 +123,7 @@ Each Property in Twitter Cards corresponds with an Attribute for @<txp:shs_twitt
 | twitter:creator:id | creatorid | a twitter user ID | empty |
 |-(summary).
 | twitter:title | title | a raw text | article title |
-| twitter:description | description | a text | excerpt of the article (HTML element are striped out) |
+| twitter:description | description | a text | description or excerpt of the article (HTML element are striped out) |
 | twitter:image | image | a picture url | article picture if exitst |
 |-(photo).
 | twitter:image:width | imagewidth | a integer | empty |
@@ -157,7 +157,7 @@ h3. Main Source Code
 
 This software (without included parts, see below) is licensed under the following GPL license:
 
-pre.  * Copyright 2012, 2014 Sebastian Spautz
+pre.  * Copyright 2012, 2014, 2016 Sebastian Spautz
  *
  * Textpattern Twitter Cards Plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -222,6 +222,7 @@ h2. ChangeLog
 * _0.2.0:_ Add card type *summary_large_image* to documentation; implement card type *app* and the *deep-linking feature* of twitter cards
 * _0.2.1:_ Check if Title or Description are empty strings
 * _0.3.0:_ Register the custom tags to avoid a warning in debug mode of Textpattern
+* _0.3.1:_ Use the new description field in Textpattern 4.6 to generate the twitter card
 # --- END PLUGIN HELP ---
 <?php
 }
@@ -230,7 +231,7 @@ h2. ChangeLog
 function shs_twittercards($atts) {
 	//Works only for single articles
 	if ( !$GLOBALS['is_article_list']  ) {
-		
+
 		//Set Parameters to default Values
 		extract(lAtts(array(
 			'onlytwitteragent' => '1',
@@ -240,13 +241,13 @@ function shs_twittercards($atts) {
 			'creator' => '',
 			'creatorid' => '',
 			//'url' => processTags('permlink', ''),
-			'description' => $GLOBALS['thisarticle']['excerpt'],
+            'description' => $GLOBALS['thisarticle']['description'],
 			'title' => $GLOBALS['thisarticle']['title'],
 			'image' => '',
 			'imagedefault' => '',
 			'imagewidth' => '',
 			'imageheight' => '',
-			
+
 			'appidiphone' => '',
 			'appnameiphone' => '',
 			'appurliphone' => '',
@@ -256,24 +257,29 @@ function shs_twittercards($atts) {
 			'appidgoogleplay' => '',
 			'appnamegoogleplay' => '',
 			'appurlgoogleplay' => '',
-			
+
 			'player' => '',
 			'playerwidth' => '',
 			'playerheight' => '',
 			'playerstream' => '',
 			'playerstreamcontenttype' => ''
 			), $atts));
-		
+
 		// Check the title for empty string
 		if ($title == '') {
 			$title = 'Unkown Title';
 		}
-		
+
 		// Check the description for empty string
 		if ($description == '') {
-			$description = 'Nothing to describe!';
+                        if ($GLOBALS['thisarticle']['excerpt'] == '') {
+				$description = 'Nothing to describe!';
+			} else {
+				// Fallback to Excerpt
+				$description = $GLOBALS['thisarticle']['excerpt'];
+			}
 		}
-		
+
 		// Check the article_image for
 		//  a) a picture is set
 		if ($image != '') {
@@ -291,7 +297,7 @@ function shs_twittercards($atts) {
 		else {
 			$image_url = '';
 		}
-		
+
 		//Convert the actual image_url value to an absolute url
 		if ($image_url != '')
 		{
@@ -300,7 +306,7 @@ function shs_twittercards($atts) {
 				$image_url = processTags('image_url', 'id="'.$image_url.'" link="0"');
 			}
 			// b) a relative URL (absolute URL's starts width 'http://' or 'https://')
-			else if (!strpos($image_url, 'http://') 
+			else if (!strpos($image_url, 'http://')
 			         && !strpos($image_url, 'https://')) {
 				$baseUrl = $_SERVER['HTTP_HOST'] . $GLOBALS['pretext']['request_uri'];
 				if (array_key_exists('HTTPS', $_SERVER)) {
@@ -317,33 +323,33 @@ function shs_twittercards($atts) {
 				//$image_url = $image_url
 			}
 		}
-		
-		// Test if rendering of a Twitter Card is necessary 
+
+		// Test if rendering of a Twitter Card is necessary
 		if ( isTwitterAgent() || $onlytwitteragent == '0') {
 			// Create the Twitter Card Meta Elements
 			$returnvalue .= '<!-- Twitter Card --> ';
 			$returnvalue .= '<meta name="twitter:card" content="'.$cardtype.'" /> ';
-			
-			if ($site != '' && $siteid == '') 
+
+			if ($site != '' && $siteid == '')
 				$returnvalue = $returnvalue.'<meta name="twitter:site" content="'.$site.'" /> ';
-			if ($siteid != '') 
+			if ($siteid != '')
 				$returnvalue = $returnvalue.'<meta name="twitter:site:id" content="'.$siteid.'" /> ';
-			if ($creator != '' && $creatorid == '') 
+			if ($creator != '' && $creatorid == '')
 				$returnvalue = $returnvalue.'<meta name="twitter:creator" content="'.$creator.'" /> ';
-			if ($creatorid != '') 
+			if ($creatorid != '')
 				$returnvalue = $returnvalue.'<meta name="twitter:creator:id" content="'.$creatorid.'" /> ';
-			
+
 			$returnvalue .= renderAppProperties($appiphone, $appipad, $appgoogleplay);
-			
+
 			//URL is no longer part of the specification
-			//if ($url != '') 
+			//if ($url != '')
 			//	$returnvalue = $returnvalue.'<meta name="twitter:url" content="'.$url.'" /> ';
-			
-			if ($description != '') 
+
+			if ($description != '')
 				$returnvalue = $returnvalue.'<meta name="twitter:description" content="'.trim(strip_tags($description)).'" /> ';
-			if ($title != '') 
-				$returnvalue = $returnvalue.'<meta name="twitter:title" content="'.$title.'" /> ';		
-			
+			if ($title != '')
+				$returnvalue = $returnvalue.'<meta name="twitter:title" content="'.$title.'" /> ';
+
 			if ($image_url != '') {
 				$returnvalue = $returnvalue.'<meta name="twitter:image" content="'.$image_url.'" /> ';
 				if ($imagewidth != '') {
@@ -353,9 +359,7 @@ function shs_twittercards($atts) {
 					$returnvalue = $returnvalue.'<meta name="twitter:image:height" content="'.$imageheight.'" /> ';
 				}
 			}
-			
-			
-			
+
 			if ($player != '') {
 				$returnvalue = $returnvalue.'<meta name="twitter:player:height" content="'.$player.'" /> ';
 				$returnvalue = $returnvalue.'<meta name="twitter:player:width" content="'.$playerwidth.'" /> ';
@@ -365,7 +369,7 @@ function shs_twittercards($atts) {
 				$returnvalue = $returnvalue.'<meta name="twitter:player:stream" content="'.$playerstream.'" /> ';
 				$returnvalue = $returnvalue.'<meta name="twitter:player:stream:content_type" content="'.$playerstreamcontenttype.'" /> ';
 			}
-				
+
 			return $returnvalue;
 		}
 		else {
@@ -377,8 +381,8 @@ function shs_twittercards($atts) {
 function renderAppProperties($idIPhoneApp, $nameIPhoneApp, $urlIPhoneApp
 		, $idIPadApp, $nameIPadApp, $urlIPadApp
 		, $idGoolePlaystoreApp, $nameGoolePlaystoreApp, $urlGoolePlaystoreApp) {
-		
-	$returnvalue = '<!-- Twitter App/Deep linking properties--> ';    
+
+	$returnvalue = '<!-- Twitter App/Deep linking properties--> ';
 	if ($idIPhoneApp != '') {
 		$returnvalue .= '<meta name="twitter:app:id:iphone" content="'. $idIPhoneApp .'"> ';
 	}
@@ -418,6 +422,11 @@ function isTwitterAgent() {
 	}
 }
 
+if (class_exists('\Textpattern\Tag\Registry')) {
+	Txp::get('\Textpattern\Tag\Registry')
+		->register('shs_twittercards')
+	;
+}
 
 /** Following code is copied from http://sourceforge.net/projects/absoluteurl/ and Licensed by the following BSD License. */
 /**
@@ -860,12 +869,12 @@ function join_url( $parts, $encode=FALSE)
 }
 
 /**
- * This function encodes URL to form a URL which is properly 
+ * This function encodes URL to form a URL which is properly
  * percent encoded to replace disallowed characters.
  *
  * RFC3986 specifies the allowed characters in the URL as well as
- * reserved characters in the URL. This function replaces all the 
- * disallowed characters in the URL with their repective percent 
+ * reserved characters in the URL. This function replaces all the
+ * disallowed characters in the URL with their repective percent
  * encodings. Already encoded characters are not encoded again,
  * such as '%20' is not encoded to '%2520'.
  *
@@ -873,7 +882,7 @@ function join_url( $parts, $encode=FALSE)
  * 	url		the url to encode.
  *
  * Return values:
- * 	Returns the encoded URL string. 
+ * 	Returns the encoded URL string.
  */
 function encode_url($url) {
   $reserved = array(
@@ -901,12 +910,6 @@ function encode_url($url) {
   $url = rawurlencode($url);
   $url = preg_replace(array_values($reserved), array_keys($reserved), $url);
   return $url;
-}
-
-if (class_exists('\Textpattern\Tag\Registry')) {
-	Txp::get('\Textpattern\Tag\Registry')
-		->register('shs_twittercards')
-	;
 }
 
 # --- END PLUGIN CODE ---

@@ -29,14 +29,14 @@
     
     <section>
 		<h1>Description</h1>
-		<p>This is a plugin for Textpattern 4.5.4. This plugin implements the Twitter Cards format. <a href="https://dev.twitter.com/docs/cards" rel="nofollow">Twitter Cards</a> is a meta data format to improve the user experience sharing websites on Twitter.</p>
+		<p>This is a plugin for Textpattern 4.6. This plugin implements the Twitter Cards format. <a href="https://dev.twitter.com/docs/cards" rel="nofollow">Twitter Cards</a> is a meta data format to improve the user experience sharing websites on Twitter.</p>
 		<p>The only tag defined in this plugin is <code>&lt;txp:shs_twittercards&gt;</code>. It works only inside a single article scope. In article lists you need to implement Twitter Cards manually.</p>
 	</section>
 	
 	<section>
 		<h1>Download</h1>
 		<ul>
-			<li><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-3-0.php">Plugin Version 0.3.0</a></li>
+			<li><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-3-1.php">Plugin Version 0.3.1</a></li>
 			<li><a href="https://github.com/sebastiansIT/SHSTextpattern/tree/master/shs_twittercards">Source code</a></li>
 		</ul>
 	</section>
@@ -48,7 +48,7 @@
 		<pre><code>&lt;meta name=&quot;twitter:card&quot; content=&quot;summary&quot;&gt;
 &lt;meta name=&quot;twitter:url&quot; content=&quot;{Permalink of the article}&quot;&gt;
 &lt;meta name=&quot;twitter:title&quot; content=&quot;{Title of the article}&quot;&gt;
-&lt;meta name=&quot;twitter:description&quot; content=&quot;{Exceprt of the article (HTML element are striped out)}&quot;&gt;
+&lt;meta name=&quot;twitter:description&quot; content=&quot;{excerpt of the article (HTML element are striped out)}&quot;&gt;
 &lt;meta name=&quot;twitter:image&quot; content=&quot;{Article image (if exists)}&quot;&gt;
 </code></pre>
 
@@ -108,7 +108,7 @@
 			  <td> description </td>
 			  <td> a text </td>
 			  <td>
-				 excerpt of the article (
+				 description or excerpt of the article (
 				<span class="caps">HTML</span>
 				 element are striped out) 
 			  </td>
@@ -321,7 +321,8 @@
 	<section>
 		<h1>ChangeLog</h1>
 		<ul>
-			<li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-3-0.php">0.3.0</a>:</em> Register the custom tags to avoid a warning in debug mode of Textpattern</li>
+			<li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-3-1.php">0.3.1</a>:</em> Use Textpatterns new description field for twitter card description (fallback is the excerpt).</li>
+            <li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-3-0.php">0.3.0</a>:</em> Register the custom tags to avoid a warning in debug mode of Textpattern (last Version compatible with Textpattern 4.5.4)</li>
             <li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-2-1.php">0.2.1</a>:</em> Check if Title or Description are empty strings</li>
 			<li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-2-0.php">0.2.0</a>:</em> Add card type *summary_large_image* to documentation; implement card type *app* and the *deep-linking feature* of twitter cards</li>
 			<li><em><a href="http://lab.human-injection.de/twittercards/shs_twittercards_0-1-4.php">0.1.4</a>:</em> Some Refactoring (compatible width Textpattern 4.5.1)</li>
