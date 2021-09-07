@@ -1,5 +1,5 @@
 <?php
-	// Copyright 2014, 2016 Sebastian Spautz
+	// Copyright 2014, 2016, 2018 Sebastian Spautz
 	
 	// "Textpattern Webmention Plugin" is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ $plugin['name'] = 'shs_webmention';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '0.4.0';
+$plugin['version'] = '0.4.1';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Implements a receiver for webmentions.';
@@ -52,9 +52,9 @@ if (0) {
 ?>
 # --- BEGIN PLUGIN HELP ---
 
-h1. Textpattern Webmention Plugin (Version 0.4.0)
+h1. Textpattern Webmention Plugin (Version 0.4.1)
 
-This plugin for Textpattern 4.5.4 implements a receiver for the webmention specification. 
+This plugin for Textpattern 4.6.2 implements a receiver for the webmention specification. 
 Webmention is a simple technology to notify any URL when you link to it on your site. 
 For more information about Webmentions see "https://indiewebcamp.com/webmention":https://indiewebcamp.com/webmention.
 
@@ -101,7 +101,7 @@ h2. License
 
 This software is licensed under the following GPL license:
 
-pre.  * Copyright 2014, 2016 Sebastian Spautz
+pre.  * Copyright 2014, 2016, 2018 Sebastian Spautz
  *
  * Textpattern Webmention Plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -119,6 +119,7 @@ This Plugin use some code from https://gist.github.com/adactio/6484118.
  
 h2. ChangeLog
 
+* _0.4.1:_ Declare local variables to avoid PHP notices
 * _0.4.0:_ Register the custom tag to avoid a warning in debug mode of Textpattern
 * _0.3.0:_ Checks Type of webmention (reply, like, repost or simple link)
 * _0.2.2:_ Refactoring code
@@ -208,6 +209,8 @@ function shs_webmention_receive() {
 #-- BEGIN Discovery
 function shs_webmention_discovery($atts) {
 	global $prefs;
+    $returnvalue = '';
+    
 	header('Link:<http://'.$prefs['siteurl'].'/webmention.php>; rel="webmention"', false);
 	$returnvalue .= '<!-- Webmention Discovery --> ';
 	$returnvalue .= '<link rel="webmention" href="http://'.$prefs['siteurl'].'/webmention.php" />';

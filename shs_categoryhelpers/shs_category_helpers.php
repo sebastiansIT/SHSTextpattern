@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	// Copyright 2013, 2016 Sebastian Spautz
 	
 	// "Sebastians Textpattern Category Helpers" is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ $plugin['name'] = 'shs_category_helpers';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '1.1.0';
+$plugin['version'] = '1.1.1';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Helper-Tags to handle categories';
@@ -53,9 +53,9 @@ if (0) {
 
 # --- BEGIN PLUGIN HELP ---
 
-h1. Sebastians Textpattern Category Helpers (Version 1.1.0)
+h1. Sebastians Textpattern Category Helpers (Version 1.1.1)
 
-This plugin for Textpattern 4.5.4 defines some Tags to generate category relatet markup for my own Weblog human-injection.de.
+This plugin for Textpattern 4.6.2 defines some Tags to generate category relatet markup for my own Weblog human-injection.de.
 
 Currently it generates a link for each ancestor of the two article categories and combine them.
 
@@ -63,7 +63,7 @@ h2. License
 
 This software is licensed under the following GPL license:
 
-pre.  * Copyright 2013 Sebastian Spautz
+pre.  * Copyright 2013, 2018 Sebastian Spautz
  *
  * Textpattern Twitter Cards Plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ pre.  * Copyright 2013 Sebastian Spautz
  * see http://www.gnu.org/licenses/.
 
 h2. ChangeLog
-* _1.1.0:_ Register the custom tags to avoid a warning in debug mode of Textpattern
+* _1.1.1:_ Register the custom tags to avoid a warning in debug mode of Textpattern
 * _1.0.0:_ First Release
 # --- END PLUGIN HELP ---
 
@@ -86,6 +86,11 @@ h2. ChangeLog
 }
 
 # --- BEGIN PLUGIN CODE ---
+if (class_exists('\Textpattern\Tag\Registry')) {
+	Txp::get('\Textpattern\Tag\Registry')
+		->register('shs_ancestors_categories');
+}
+
 function shs_ancestors_categories($atts, $thing='') {
 	//Works only for single articles
 	if ( !$GLOBALS['is_article_list']  ) {
@@ -116,7 +121,7 @@ function shs_ancestors_categories($atts, $thing='') {
 			'this_section' => $this_section,
 			'name' => $tree[$i]['name'],
 			'type' => $type,), $thing);
-			 $out .= " <span>⊇</span> ";
+			 $out .= " <span>?</span> ";
 		  }
 		  $out .= category(array(
 			'class' => $class."_level".$tree[count($tree)-1]["level"],
@@ -129,7 +134,7 @@ function shs_ancestors_categories($atts, $thing='') {
 		}
 
 		if ($category1 && $category2) {
-		  $out .= " <span>∩</span> ";
+		  $out .= " <span>n</span> ";
 		}
 
 		if ($category2) {
@@ -143,7 +148,7 @@ function shs_ancestors_categories($atts, $thing='') {
 			'name' => $tree[0]['name'],
 			'type' => $type,), $thing);
 		  for ($i = 1; $i < count($tree)-1; $i++) {
-			 $out .=" <span>⊆</span> ";
+			 $out .=" <span>?</span> ";
 			 $out .= category(array(
 			'class' => $class."_level".$tree[$i]["level"],
 			'link' => 1,
@@ -159,10 +164,5 @@ function shs_ancestors_categories($atts, $thing='') {
 	}
 } //end of function shs_ancestors_categories($atts)
 
-if (class_exists('\Textpattern\Tag\Registry')) {
-	Txp::get('\Textpattern\Tag\Registry')
-		->register('shs_ancestors_categories')
-	;
-}
 # --- END PLUGIN CODE ---
 ?>
