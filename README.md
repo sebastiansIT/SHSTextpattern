@@ -15,7 +15,7 @@ This plugin for Textpattern 4.5.4 implements a receiver for the webmention speci
 
 ## [shs_twittercard](shs_twittercard)
 
-This is a plugin for Textpattern 4.5.4. This plugin implements the Twitter Cards format. [Twitter Cards](https://dev.twitter.com/docs/cards) is a meta data format to improve the user experience sharing websites on Twitter.
+This is a plugin for Textpattern 4.8. This plugin implements the Twitter Cards format. [Twitter Cards](https://dev.twitter.com/docs/cards) is a meta data format to improve the user experience sharing websites on Twitter.
 
 The only tag defined in this plugin is <txp:shs_twittercards>. It works only inside a single article scope. In article lists you need to implement Twitter Cards manually.
 
@@ -37,9 +37,7 @@ This plugin for Textpattern 4.5.4 defines some Tags to generate category relatet
 Currently it generates a link for each ancestor of the two article categories and combine them.
 
 # Resources on creating Textpattern plugins
-* [Overview](http://textbook.textpattern.net/wiki/index.php?title=Plugin_Development_Topics)
-* [Tutorial](http://thresholdstate.com/articles/3975/anatomy-of-a-textpattern-plugin-part-1)
-* [Mailinglist for plugin devs](http://lists.textpattern.com/)
+* [Overview](https://docs.textpattern.com/development/)
 * [Developer resources (further links, tools and help](http://forum.textpattern.com/viewtopic.php?id=9881)
 
 

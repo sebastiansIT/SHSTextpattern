@@ -2,7 +2,7 @@
 
 ## shs_twittercard
 
-This is a plugin for Textpattern 4.6. This plugin implements the Twitter Cards format. [Twitter Cards](https://dev.twitter.com/docs/cards) is a meta data format to improve the user experience sharing websites on Twitter.
+This is a plugin for Textpattern 4.8. This plugin implements the Twitter Cards format. [Twitter Cards](https://dev.twitter.com/docs/cards) is a meta data format to improve the user experience sharing websites on Twitter.
 
 The only tag defined in this plugin is <txp:shs_twittercards>. It works only inside a single article scope. In article lists you need to implement Twitter Cards manually.
 

@@ -1,5 +1,5 @@
 <?php
-	// Copyright 2012, 2014, 2016 Sebastian Spautz
+	// Copyright 2012, 2014, 2016, 2021 Sebastian Spautz
 	
 	// "Textpattern Twitter Cards Plugin" is free software: you can redistribute it and/or modify
     // it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ $plugin['name'] = 'shs_twittercards';
 // 1 = Plugin help is in raw HTML.  Not recommended.
 $plugin['allow_html_help'] = 0;
 
-$plugin['version'] = '0.3.1';
+$plugin['version'] = '0.3.3';
 $plugin['author'] = 'Sebastian Spautz';
 $plugin['author_uri'] = 'http://human-injection.de/';
 $plugin['description'] = 'Creates Meta-Elements to include Twitter Cards into your pages.';
@@ -94,9 +94,9 @@ if (0) {
 ?>
 # --- BEGIN PLUGIN HELP ---
 
-h1. Textpattern Twitter Cards Plugin (Version 0.3.1)
+h1. Textpattern Twitter Cards Plugin (Version 0.3.3)
 
-This plugin for Textpattern 4.6 implements the Twitter Cards format (the version from 2013-05-08). "Twitter Cards":https://dev.twitter.com/docs/cards is a meta data format to improve the user experience sharing websites on Twitter. For more information about Twitter Cards see https://dev.twitter.com/docs/cards.
+This plugin for Textpattern 4.8 implements the Twitter Cards format (the version from 2013-05-08). "Twitter Cards":https://dev.twitter.com/docs/cards is a meta data format to improve the user experience sharing websites on Twitter. For more information about Twitter Cards see https://dev.twitter.com/docs/cards.
 
 The only tag defined in this plugin is @<txp:shs_twittercards>@. It works only inside a single article scope. In article lists you need to implement Twitter Cards manually.
 
@@ -157,7 +157,7 @@ h3. Main Source Code
 
 This software (without included parts, see below) is licensed under the following GPL license:
 
-pre.  * Copyright 2012, 2014, 2016 Sebastian Spautz
+pre.  * Copyright 2012, 2014, 2016, 2021 Sebastian Spautz
  *
  * Textpattern Twitter Cards Plugin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -223,6 +223,8 @@ h2. ChangeLog
 * _0.2.1:_ Check if Title or Description are empty strings
 * _0.3.0:_ Register the custom tags to avoid a warning in debug mode of Textpattern
 * _0.3.1:_ Use the new description field in Textpattern 4.6 to generate the twitter card
+* _0.3.2:_ Fix a Bug preventing the plugin to work! Sorry!
+* _0.3.3:_ Fix localy a incompatibility with PHP regular expressions inside of "UrlToAbsolute":http://sourceforge.net/projects/absoluteurl/ 
 # --- END PLUGIN HELP ---
 <?php
 }
@@ -338,9 +340,11 @@ function shs_twittercards($atts) {
 				$returnvalue = $returnvalue.'<meta name="twitter:creator" content="'.$creator.'" /> ';
 			if ($creatorid != '')
 				$returnvalue = $returnvalue.'<meta name="twitter:creator:id" content="'.$creatorid.'" /> ';
-
-			$returnvalue .= renderAppProperties($appiphone, $appipad, $appgoogleplay);
-
+			
+			$returnvalue .= renderAppProperties($appiphone, $appnameiphone, $appurliphone,
+				$appipad, $appnameipad, $appurlipad,
+				$appgoogleplay, $appnamegoogleplay, $appurlgoogleplay);
+			
 			//URL is no longer part of the specification
 			//if ($url != '')
 			//	$returnvalue = $returnvalue.'<meta name="twitter:url" content="'.$url.'" /> ';
@@ -382,7 +386,10 @@ function renderAppProperties($idIPhoneApp, $nameIPhoneApp, $urlIPhoneApp
 		, $idIPadApp, $nameIPadApp, $urlIPadApp
 		, $idGoolePlaystoreApp, $nameGoolePlaystoreApp, $urlGoolePlaystoreApp) {
 
-	$returnvalue = '<!-- Twitter App/Deep linking properties--> ';
+	$returnvalue = '';
+	if ($idIPhoneApp != '' || $idIPadApp != '' || $idGoolePlaystoreApp != '') {
+	    $returnvalue .= '<!-- Twitter App/Deep linking properties--> ';
+    }
 	if ($idIPhoneApp != '') {
 		$returnvalue .= '<meta name="twitter:app:id:iphone" content="'. $idIPhoneApp .'"> ';
 	}
@@ -689,7 +696,7 @@ function split_url( $url, $decode=FALSE)
 	$xpchar        = $xunressub . ':@% ';
 
 	// Scheme from RFC3986.
-	$xscheme        = '([a-zA-Z][a-zA-Z\d+-.]*)';
+	$xscheme        = '([a-zA-Z][a-zA-Z\d+\-.]*)'; // FIX
 
 	// User info (user + password) from RFC3986.
 	$xuserinfo     = '((['  . $xunressub . '%]*)' .
@@ -704,7 +711,7 @@ function split_url( $url, $decode=FALSE)
 	// Host name from RFC1035.  Technically, must start with a letter.
 	// Relax that restriction to better parse URL structure, then
 	// leave host name validation to application.
-	$xhost_name    = '([a-zA-Z\d-.%]+)';
+	$xhost_name    = '([a-zA-Z\d\-.%]+)'; //FIX
 
 	// Authority from RFC3986.  Skip IP future.
 	$xhost         = '(' . $xhost_name . '|' . $xipv4 . '|' . $xipv6 . ')';
